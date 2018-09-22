@@ -10,7 +10,10 @@ class LeaderboardModuleController extends ModuleController {
     SessionUtils::enforceLogin();
 
     await tr_start();
+    $my_rank_status = true;
+    $leaderboard_status = true;
     $leaderboard_ul = <ul></ul>;
+
 
     list($my_team, $my_rank, $gameboard) = await \HH\Asio\va(
       MultiTeam::genTeam(SessionUtils::sessionTeam()),
@@ -23,6 +26,11 @@ class LeaderboardModuleController extends ModuleController {
       $leaders = await MultiTeam::genLeaderboard();
       $rank = 1;
       $l_max = (count($leaders) > 5) ? 5 : count($leaders);
+
+      if ($l_max === 0) {
+        $leaderboard_status = false;
+      }
+
       for ($i = 0; $i < $l_max; $i++) {
         $team = $leaders[$i];
 
@@ -66,30 +74,47 @@ class LeaderboardModuleController extends ModuleController {
       }
     } else {
       $my_rank = "N/A";
+      $my_rank_status = false;
     }
 
-    return
-      <div>
-        <header class="module-header">
-          <h6>{tr('Leaderboard')}</h6>
-        </header>
-        <div class="module-content">
-          <div class="fb-section-border">
-            <div class="module-top player-info">
-              <h5 class="player-name">{$my_team->getName()}</h5>
-              <span class="player-rank">{tr('Your Rank')}: {$my_rank}</span>
-              <br></br>
-              <span class="player-score">
-                {tr('Your Score')}: {strval($my_team->getPoints())}&nbsp;
-                {tr('pts')}
-              </span>
-            </div>
-            <div class="module-scrollable leaderboard-info">
-              {$leaderboard_ul}
+    if (($leaderboard_status === false) && ($my_rank_status === false)) {
+      return
+          <div>
+          <header class="module-header">
+            <h6>{tr('Leaderboard')}</h6>
+          </header>
+          <div class="module-content">
+            <div class="fb-section-border">
+              <div class="player-info" style="text-align: center; margin: auto; width: 100%;">
+                <span class="player-rank">Leaderboard is Close</span>
+              </div>
             </div>
           </div>
-        </div>
-      </div>;
+        </div>;
+    } else {
+      return
+        <div>
+          <header class="module-header">
+            <h6>{tr('Leaderboard')}</h6>
+          </header>
+          <div class="module-content">
+            <div class="fb-section-border">
+              <div class="module-top player-info">
+                <h5 class="player-name">{$my_team->getName()}</h5>
+                <span class="player-rank">{tr('Your Rank')}: {$my_rank}</span>
+                <br></br>
+                <span class="player-score">
+                  {tr('Your Score')}: {strval($my_team->getPoints())}&nbsp;
+                  {tr('pts')}
+                </span>
+              </div>
+              <div class="module-scrollable leaderboard-info">
+                {$leaderboard_ul}
+              </div>
+            </div>
+          </div>
+        </div>;
+    }
   }
 }
 
