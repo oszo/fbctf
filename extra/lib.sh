@@ -303,6 +303,9 @@ function import_empty_db() {
   local __mode=$5
   local __multiservers=$6
 
+  log "Drop DB - $__db"
+  mysql -u "$__user" --password="$__pwd" -e "DROP DATABASE IF EXISTS \`$__db\`;"
+
   log "Creating DB - $__db"
   mysql -u "$__user" --password="$__pwd" -e "CREATE DATABASE IF NOT EXISTS \`$__db\`;"
 

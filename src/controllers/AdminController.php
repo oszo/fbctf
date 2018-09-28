@@ -4114,6 +4114,7 @@ class AdminController extends Controller {
     $game = await Configuration::gen('game');
     $game_status = $game->getValue() === '1';
     $pause_action = '';
+    $pause_scoreboard_action = '';
     if ($game_status) {
       $game_action =
         <a href="#" class="fb-cta cta--red js-end-game">
@@ -4130,6 +4131,19 @@ class AdminController extends Controller {
         $pause_action =
           <a href="#" class="fb-cta cta--red js-pause-game">
             {tr('Pause Game')}
+          </a>;
+      }
+      $pause_scoreboard = await Configuration::gen('game_paused_scoreboard');
+      $game_paused_scoreboard = $pause_scoreboard->getValue() === '1';
+      if ($game_paused_scoreboard) {
+        $pause_scoreboard_action =
+          <a href="#" class="fb-cta cta--yellow js-unpause-scoreboard">
+            {tr('Unpause Scoreboard')}
+          </a>;
+      } else {
+        $pause_scoreboard_action =
+          <a href="#" class="fb-cta cta--red js-pause-scoreboard">
+            {tr('Pause Scoreboard')}
           </a>;
       }
     } else {
@@ -4207,6 +4221,7 @@ class AdminController extends Controller {
         <div class="admin-nav-controls row-fixed">
           {$game_action}
           {$pause_action}
+          {$pause_scoreboard_action}
         </div>
         <div class="admin-nav--footer row-fixed">
           <a href="/index.php?p=game">{tr('Gameboard')}</a>

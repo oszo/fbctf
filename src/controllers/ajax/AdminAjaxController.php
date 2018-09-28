@@ -128,6 +128,8 @@ class AdminAjaxController extends AjaxController {
       'end_game',
       'pause_game',
       'unpause_game',
+      'pause_scoreboard',
+      'unpause_scoreboard',
       'reset_game',
       'export_attachments',
       'backup_db',
@@ -452,6 +454,12 @@ class AdminAjaxController extends AjaxController {
       case 'unpause_game':
         await Control::genUnpause();
         return Utils::ok_response('Success', 'admin');
+      case 'pause_scoreboard':
+        await Control::genPauseScoreboard();
+        return Utils::ok_response('Success', 'admin');
+      case 'unpause_scoreboard':
+        await Control::genUnpauseScoreboard();
+        return Utils::ok_response('Success', 'admin');        
       case 'export_attachments':
         await Control::exportAttachments();
         return Utils::ok_response('Success', 'admin');

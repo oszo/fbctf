@@ -37,6 +37,22 @@ function unpauseGame() {
   sendAdminRequest(unpause_data, true);
 }
 
+// Pauses the currently running game
+function pauseScoreboard() {
+  var pause_data = {
+    action: 'pause_scoreboard'
+  };
+  sendAdminRequest(pause_data, true);
+}
+
+// Unpauses the currently running game
+function unpauseScoreboard() {
+  var unpause_data = {
+    action: 'unpause_scoreboard'
+  };
+  sendAdminRequest(unpause_data, true);
+}
+
 //Confirm team deletion
 function deleteTeamPopup(team_id) {
   var delete_team = {
@@ -1407,6 +1423,22 @@ module.exports = {
       event.preventDefault();
       Modal.loadPopup('p=action&modal=unpause-game', 'action-unpause-game', function() {
         $('#unpause_game').click(unpauseGame);
+      });
+    });
+
+    // prompt pause scoreboard
+    $('.js-pause-scoreboard').on('click', function(event) {
+      event.preventDefault();
+      Modal.loadPopup('p=action&modal=pause-scoreboard', 'action-pause-scoreboard', function() {
+        $('#pause_scoreboard').click(pauseScoreboard);
+      });
+    });
+
+    // prompt pause scoreboard
+    $('.js-unpause-scoreboard').on('click', function(event) {
+      event.preventDefault();
+      Modal.loadPopup('p=action&modal=unpause-scoreboard', 'action-unpause-scoreboard', function() {
+        $('#unpause_scoreboard').click(unpauseScoreboard);
       });
     });
 

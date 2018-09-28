@@ -208,6 +208,50 @@ class Control extends Model {
     );
   }
 
+  public static async function genPauseScoreboard(): Awaitable<void> {
+    await \HH\Asio\va(
+      Announcement::genCreateAuto('Scoreboard has been paused!'), // Announce game paused
+      ActivityLog::genCreateGenericLog('Scoreboard has been paused!'), // Log game paused
+    );
+
+    $pause_scoreboard_ts = time();
+    await \HH\Asio\va(
+      Configuration::genUpdate('pause_scoreboard_ts', strval($pause_scoreboard_ts)), // Set pause timestamp
+      Configuration::genUpdate('game_paused_scoreboard', '1'), // Set gane to paused
+    );
+  }
+
+  public static async function genUnpauseScoreboard(): Awaitable<void> {
+    // await Configuration::genUpdate('scoring', '1'); // Enable scoring
+    // list($config_pause_ts, $config_start_ts, $config_end_ts) =
+    //   await \HH\Asio\va(
+    //   Configuration::genUpdate('pause_ts', '0'), // Set pause to zero
+    //     Configuration::gen('pause_ts'), // Get pause time
+    //     Configuration::gen('start_ts'), // Get start time
+    //     Configuration::gen('end_ts'), // Get end time
+    //   );
+    // $pause_ts = intval($config_pause_ts->getValue());
+    // $start_ts = intval($config_start_ts->getValue());
+    // $end_ts = intval($config_end_ts->getValue());
+
+    // // Calulcate game remaining
+    // $game_duration = $end_ts - $start_ts;
+    // $game_played_duration = $pause_ts - $start_ts;
+    // $remaining_duration = $game_duration - $game_played_duration;
+    // $end_ts = time() + $remaining_duration;
+
+    await \HH\Asio\va(
+      // Configuration::genUpdate('end_ts', strval($end_ts)), // Set new endtime
+      Configuration::genUpdate('pause_scoreboard_ts', '0'), // Set pause to zero
+      Configuration::genUpdate('game_paused_scoreboard', '0'), // Set gane to not paused
+      // Configuration::genUpdate('timer', '1'), // Start timer
+      // Progressive::genRun(), // Kick off progressive scoreboard
+      // Level::genBaseScoring(), // Kick off scoring for bases
+      Announcement::genCreateAuto('Scoreboard has resumed!'), // Announce game resumed
+      ActivityLog::genCreateGenericLog('Scoreboard has resumed!'), // Log game resumed
+    );
+  }
+
   public static async function genAutoBegin(): Awaitable<void> {
     // Prevent autorun.php from storing timestamps in local cache, forever (the script runs continuously).
     Configuration::deleteLocalCache('CONFIGURATION');

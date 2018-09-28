@@ -77,6 +77,42 @@ class ActionModalController extends ModalController {
             </div>
           </div>;
         return tuple($title, $content);
+      case 'pause-scoreboard':
+        $title =
+          <h4>
+            {tr('pause_')}<span class="highlighted">{tr('Scoreboaard')}</span>
+          </h4>;
+        $content =
+          <div class="action-main">
+            <p>{tr('Are you sure you want to pause the scoreboard?')}</p>
+            <div class="action-actionable">
+              <a href="#" class="fb-cta cta--red js-close-modal">
+                {tr('No')}
+              </a>
+              <a href="#" id="pause_scoreboard" class="fb-cta cta--yellow">
+                {tr('Yes')}
+              </a>
+            </div>
+          </div>;
+        return tuple($title, $content);
+      case 'unpause-scoreboard':
+        $title =
+          <h4>
+            {tr('unpause_')}<span class="highlighted">{tr('Scoreboaard')}</span>
+          </h4>;
+        $content =
+          <div class="action-main">
+            <p>{tr('Are you sure you want to unpause the scoreboard?')}</p>
+            <div class="action-actionable">
+              <a href="#" class="fb-cta cta--red js-close-modal">
+                {tr('No')}
+              </a>
+              <a href="#" id="unpause_scoreboard" class="fb-cta cta--yellow">
+                {tr('Yes')}
+              </a>
+            </div>
+          </div>;
+        return tuple($title, $content);        
       case 'delete-team':
         $title =
           <h4>
