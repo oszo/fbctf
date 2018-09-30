@@ -11,8 +11,8 @@ class ScoresDataController extends DataController {
 
     $data = array();
 
-    $leaderboard = await MultiTeam::genLeaderboard(false);
-    foreach ($leaderboard as $team) {
+    $all_visible_teams = await MultiTeam::genAllVisibleTeams(true);
+    foreach ($all_visible_teams as $team) {
       $values = array();
       $i = 1;
       $progressive_scoreboard =

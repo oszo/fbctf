@@ -69,10 +69,29 @@ class Progressive extends Model {
     if (!$mc_result || count($mc_result) === 0 || $refresh) {
       $db = await self::genDb();
       $progressive = array();
-      $result =
-        await $db->queryf(
-          'SELECT MAX(id) as id, MAX(ts) as ts, team_name, MAX(points) as points, iteration FROM progressive_log GROUP BY team_name, iteration, id ORDER BY points ASC',
+
+      list($config_game_paused_scoreboard, $config_pause_scoreboard_ts) =
+        await \HH\Asio\va(
+          Configuration::gen('game_paused_scoreboard'), // Get game paused scoreboard status
+          Configuration::gen('pause_scoreboard_ts'), // Get game paused scoreboard time
         );
+      $game_paused_scoreboard = intval($config_game_paused_scoreboard->getValue());
+      $pause_scoreboard_ts = intval($config_pause_scoreboard_ts->getValue());
+      $pause_scoreboard_ts_formated = date("Y-m-d H:i:s", (int)$pause_scoreboard_ts);
+
+      if ($game_paused_scoreboard === 0){
+        $result =
+          await $db->queryf(
+            'SELECT MAX(id) as id, MAX(ts) as ts, team_name, MAX(points) as points, iteration FROM progressive_log GROUP BY team_name, iteration, id ORDER BY points ASC',
+          );
+      } else {
+        $result =
+          await $db->queryf(
+            'SELECT MAX(id) as id, MAX(ts) as ts, team_name, MAX(points) as points, iteration FROM progressive_log WHERE ts < %s GROUP BY team_name, iteration, id ORDER BY points ASC', $pause_scoreboard_ts_formated,
+          );
+      }
+
+
       foreach ($result->mapRows() as $row) {
         $progressive[$row->get('team_name')][] =
           self::progressiveFromRow($row);
