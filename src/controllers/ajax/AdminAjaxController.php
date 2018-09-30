@@ -456,10 +456,18 @@ class AdminAjaxController extends AjaxController {
         return Utils::ok_response('Success', 'admin');
       case 'pause_scoreboard':
         await Control::genPauseScoreboard();
-        return Utils::ok_response('Success', 'admin');
+        $result = await Control::genFlushMemcached();
+        if ($result) {
+          return Utils::ok_response('Success', 'admin');
+        }
+        return Utils::error_response('Error flushing memcached', 'admin');
       case 'unpause_scoreboard':
         await Control::genUnpauseScoreboard();
-        return Utils::ok_response('Success', 'admin');        
+        $result = await Control::genFlushMemcached();
+        if ($result) {
+          return Utils::ok_response('Success', 'admin');
+        }
+        return Utils::error_response('Error flushing memcached', 'admin');     
       case 'export_attachments':
         await Control::exportAttachments();
         return Utils::ok_response('Success', 'admin');

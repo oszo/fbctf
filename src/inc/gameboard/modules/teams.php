@@ -51,7 +51,16 @@ class TeamModuleController extends ModuleController {
       }
     }
 
-    if ($leaderboard_count === 0) {
+    list($config_game_paused_scoreboard, $config_pause_scoreboard_ts) =
+    await \HH\Asio\va(
+      Configuration::gen('game_paused_scoreboard'), // Get game paused scoreboard status
+      Configuration::gen('pause_scoreboard_ts'), // Get game paused scoreboard time
+    );
+    $game_paused_scoreboard = intval($config_game_paused_scoreboard->getValue());
+    $pause_scoreboard_ts = intval($config_pause_scoreboard_ts->getValue());
+    $pause_scoreboard_ts_formated = date("Y-m-d H:i:s", $pause_scoreboard_ts);
+
+    if ($game_paused_scoreboard === 1) {
       return
         <div>
           <header class="module-header">

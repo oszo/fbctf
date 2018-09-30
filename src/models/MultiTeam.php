@@ -372,11 +372,27 @@ class MultiTeam extends Team {
   ): Awaitable<Map<int, Team>> {
     $mc_result = self::getMCRecords('TEAMS_BY_LEVEL');
     if (!$mc_result || count($mc_result) === 0 || $refresh) {
+
+      list($config_game_paused_scoreboard, $config_pause_scoreboard_ts) =
+        await \HH\Asio\va(
+          Configuration::gen('game_paused_scoreboard'), // Get game paused scoreboard status
+          Configuration::gen('pause_scoreboard_ts'), // Get game paused scoreboard time
+        );
+      $game_paused_scoreboard = intval($config_game_paused_scoreboard->getValue());
+      $pause_scoreboard_ts = intval($config_pause_scoreboard_ts->getValue());
+      $pause_scoreboard_ts_formated = date("Y-m-d H:i:s", (int)$pause_scoreboard_ts);
+
       $teams_by_completed_level = array();
       $scores =
-        await self::genTeamArrayFromDB(
-          'SELECT level_id, team_id FROM scores_log WHERE level_id IS NOT NULL ORDER BY ts',
-        );
+      await self::genTeamArrayFromDB(
+        'SELECT level_id, team_id FROM scores_log WHERE level_id IS NOT NULL ORDER BY ts',
+      );
+      if($game_paused_scoreboard === 1){
+        $scores =
+          await self::genTeamArrayFromDB(
+            'SELECT level_id, team_id FROM scores_log WHERE level_id IS NOT NULL AND ts < "'.$pause_scoreboard_ts_formated.'" ORDER BY ts',
+          );
+      }
       $team_scores_awaitables = Map {};
       foreach ($scores->items() as $score) {
         if ($team_scores_awaitables->contains(
