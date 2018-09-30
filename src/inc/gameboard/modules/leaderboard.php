@@ -77,7 +77,7 @@ class LeaderboardModuleController extends ModuleController {
       $my_rank_status = false;
     }
 
-    if (($leaderboard_status === false) && ($my_rank_status === false)) {
+    if ($leaderboard_status === false) {
       return
         <div>
           <header class="module-header">

@@ -111,16 +111,32 @@ class MultiTeam extends Team {
         $leaderboard_limit_cache !== intval($leaderboard_limit->getValue()) ||
         ($limit === false && (count($mc_result) !== $teams_count)) ||
         $refresh) {
+      
+      list($config_game_paused_scoreboard, $config_pause_scoreboard_ts) =
+        await \HH\Asio\va(
+          Configuration::gen('game_paused_scoreboard'), // Get game paused scoreboard status
+          Configuration::gen('pause_scoreboard_ts'), // Get game paused scoreboard time
+        );
+      $game_paused_scoreboard = intval($config_game_paused_scoreboard->getValue());
+      $pause_scoreboard_ts = intval($config_pause_scoreboard_ts->getValue());
+      $pause_scoreboard_ts_formated = date("Y-m-d H:i:s", (int)$pause_scoreboard_ts);
+
+      $genLeaderboard_query = 'SELECT * FROM teams WHERE active = 1 AND visible = 1';
+      if($game_paused_scoreboard === 1){
+        $genLeaderboard_query .= ' AND FALSE';
+      }
+      $genLeaderboard_query .= ' ORDER BY points DESC, last_score ASC';
+
       if ($limit === true) {
         $teams =
           await self::genTeamArrayFromDB(
-            'SELECT * FROM teams WHERE active = 1 AND visible = 1 ORDER BY points DESC, last_score ASC',
+            $genLeaderboard_query,
             intval($leaderboard_limit->getValue()),
           );
       } else {
         $teams =
           await self::genTeamArrayFromDB(
-            'SELECT * FROM teams WHERE active = 1 AND visible = 1 ORDER BY points DESC, last_score ASC',
+            $$genLeaderboard_query,
           );
       }
       $team_leaderboard = array();
