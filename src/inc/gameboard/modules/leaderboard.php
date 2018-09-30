@@ -10,7 +10,6 @@ class LeaderboardModuleController extends ModuleController {
     SessionUtils::enforceLogin();
 
     await tr_start();
-    $my_rank_status = true;
     $leaderboard_status = true;
     $leaderboard_ul = <ul></ul>;
 
@@ -74,10 +73,10 @@ class LeaderboardModuleController extends ModuleController {
       }
     } else {
       $my_rank = "N/A";
-      $my_rank_status = false;
     }
 
     if ($leaderboard_status === false) {
+      $my_rank = "N/A";
       return
         <div>
           <header class="module-header">
@@ -85,6 +84,15 @@ class LeaderboardModuleController extends ModuleController {
           </header>
           <div class="module-content">
             <div class="fb-section-border">
+              <div class="module-top player-info">
+                <h5 class="player-name">{$my_team->getName()}</h5>
+                <span class="player-rank">{tr('Your Rank')}: {$my_rank}</span>
+                <br></br>
+                <span class="player-score">
+                  {tr('Your Score')}: {strval($my_team->getPoints())}&nbsp;
+                  {tr('pts')}
+                </span>
+              </div>
               <div class="player-info" style="text-align: center; margin: auto; width: 100%;">
                 <span class="player-rank">Leaderboard is Close</span>
               </div>

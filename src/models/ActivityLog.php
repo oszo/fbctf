@@ -284,9 +284,29 @@ class ActivityLog extends Model {
     if (!$mc_result || count($mc_result) === 0 || $refresh) {
       $db = await self::genDb();
       $activity_log_lines = array();
-      $result = await $db->query(
-        'SELECT * FROM activity_log ORDER BY ts DESC LIMIT 100',
-      );
+
+      list($config_game_paused_scoreboard, $config_pause_scoreboard_ts) =
+        await \HH\Asio\va(
+          Configuration::gen('game_paused_scoreboard'), // Get game paused scoreboard status
+          Configuration::gen('pause_scoreboard_ts'), // Get game paused scoreboard time
+        );
+      $game_paused_scoreboard = intval($config_game_paused_scoreboard->getValue());
+      $pause_scoreboard_ts = intval($config_pause_scoreboard_ts->getValue());
+      $pause_scoreboard_ts_formated = date("Y-m-d H:i:s", (int)$pause_scoreboard_ts);
+
+      // $result = await $db->query(
+      //   'SELECT 0',
+      // );
+      if($game_paused_scoreboard === 0){
+        $result = await $db->query(
+          'SELECT * FROM activity_log ORDER BY ts DESC LIMIT 100',
+        );
+      } else {
+        $result = await $db->query(
+          'SELECT * FROM activity_log WHERE ts <= "' . $pause_scoreboard_ts_formated . '" ORDER BY ts DESC LIMIT 100',
+        );
+      }
+
       foreach ($result->mapRows() as $row) {
         $activity_log = self::activitylogFromRow($row);
         if (($activity_log->getFormattedMessage() !== '') ||
