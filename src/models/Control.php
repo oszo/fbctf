@@ -333,9 +333,7 @@ class Control extends Model {
         await Control::genPauseScoreboardSchedule(strval($end_ts-$pause_scoreboard_schedule_sec_value));
       } else if (($game_paused_scoreboard_schedule === 1) &&
       (($end_ts - $now - $conf_sleep_secs) <= $pause_scoreboard_schedule_sec_value)) {
-        // $pause_scoreboard = date(tr('date and time format'), ($end_ts-$pause_scoreboard_schedule_sec_value));
         $pause_scoreboard = date("Y-m-d H:i:s", ($end_ts-$pause_scoreboard_schedule_sec_value));
-        // $pause_scoreboard = strval($end_ts-$pause_scoreboard_schedule_sec_value);
         await \HH\Asio\va(
           Announcement::genCreateAuto('Scoreboard will pause at ' . $pause_scoreboard . '!'), // Announce scoreboard paused
           ActivityLog::genCreateGenericLog('Scoreboard will pause at '. $pause_scoreboard . '!'), // Log scoreboard paused
