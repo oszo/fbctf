@@ -4216,23 +4216,23 @@ class AdminController extends Controller {
             {tr('Pause Game')}
           </a>;
       }
-      $pause_scoreboard = await Configuration::gen('game_paused_scoreboard');
-      $game_paused_scoreboard = $pause_scoreboard->getValue() === '1';
-      if ($game_paused_scoreboard) {
-        $pause_scoreboard_action =
-          <a href="#" class="fb-cta cta--yellow js-unpause-scoreboard">
-            {tr('Unpause Scoreboard')}
-          </a>;
-      } else {
-        $pause_scoreboard_action =
-          <a href="#" class="fb-cta cta--red js-pause-scoreboard">
-            {tr('Pause Scoreboard')}
-          </a>;
-      }
     } else {
       $game_action =
         <a href="#" class="fb-cta cta--yellow js-begin-game">
           {tr('Begin Game')}
+        </a>;
+    }
+    $pause_scoreboard = await Configuration::gen('game_paused_scoreboard');
+    $game_paused_scoreboard = $pause_scoreboard->getValue() === '1';
+    if ($game_paused_scoreboard) {
+      $pause_scoreboard_action =
+        <a href="#" class="fb-cta cta--yellow js-unpause-scoreboard">
+          {tr('Unpause Scoreboard')}
+        </a>;
+    } else {
+      $pause_scoreboard_action =
+        <a href="#" class="fb-cta cta--red js-pause-scoreboard">
+          {tr('Pause Scoreboard')}
         </a>;
     }
     $branding_xhp = await $this->genRenderBranding();

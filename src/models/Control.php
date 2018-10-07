@@ -75,6 +75,8 @@ class Control extends Model {
       self::genResetBases(), // Clear bases log
       self::genClearScriptLog(),
       Configuration::genUpdate('registration', '0'), // Disable registration
+      Configuration::genUpdate('game_paused_scoreboard', '0'), // Clear Pause Scoreboard Status
+      Configuration::genUpdate('pause_scoreboard_ts', '0'), // Put Pause Scoreboard timestamps to zero
     );
 
     await \HH\Asio\va(
@@ -159,6 +161,14 @@ class Control extends Model {
       // Set game to not paused
       await Configuration::genUpdate('game_paused', '0');
     }
+  }
+
+  public static async function genPauseScoreboardSchedule(string $pause_scoreboard_ts): Awaitable<void> {
+    await \HH\Asio\va(
+      Configuration::genUpdate('pause_scoreboard_ts', strval($pause_scoreboard_ts)), // Set scoreboard pause timestamp
+      Configuration::genUpdate('game_paused_scoreboard', '1'), // Set scoreboard to paused
+    );
+    $leaders = await MultiTeam::genLeaderboard(true, true); // Refrash Leaderboard cache
   }
 
   public static async function genPause(): Awaitable<void> {
@@ -288,6 +298,52 @@ class Control extends Model {
     }
   }
 
+  public static async function genAutoPauseScoreboard(): Awaitable<void> {
+    // Prevent autorun.php from storing timestamps in local cache, forever (the script runs continuously).
+    Configuration::deleteLocalCache('CONFIGURATION');
+    // Calculate timestamp of the paused scoreboard schedule
+    $conf_sleep = await Configuration::gen('autorun_cycle');
+    $conf_sleep_secs = intval($conf_sleep->getValue());
+    $config_end_ts = await Configuration::gen('end_ts');
+    $end_ts = intval($config_end_ts->getValue());
+    if ($end_ts > 0) {
+      list($config_game_paused_scoreboard_schedule, $config_value, $config_unit) = 
+        await \HH\Asio\va(
+          Configuration::gen('game_paused_scoreboard_schedule'),
+          Configuration::gen('pause_scoreboard_schedule_value'),
+          Configuration::gen('pause_scoreboard_schedule_unit'),
+      );
+      $game_paused_scoreboard_schedule = intval($config_game_paused_scoreboard_schedule->getValue());
+      $pause_scoreboard_schedule_value = intval($config_value->getValue());
+      $pause_scoreboard_schedule_unit = $config_unit->getValue();
+      switch ($pause_scoreboard_schedule_unit) {
+        case 'd':
+          $pause_scoreboard_schedule_sec_value = $pause_scoreboard_schedule_value * 60 * 60 * 24;
+          break;
+        case 'h':
+          $pause_scoreboard_schedule_sec_value = $pause_scoreboard_schedule_value * 60 * 60;
+          break;
+        case 'm':
+          $pause_scoreboard_schedule_sec_value = $pause_scoreboard_schedule_value * 60;
+          break;
+      }
+      $now = time();
+      if (($game_paused_scoreboard_schedule === 1) &&
+          (($end_ts - $now) <= $pause_scoreboard_schedule_sec_value)) {
+        await Control::genPauseScoreboardSchedule(strval($end_ts-$pause_scoreboard_schedule_sec_value));
+      } else if (($game_paused_scoreboard_schedule === 1) &&
+      (($end_ts - $now - $conf_sleep_secs) <= $pause_scoreboard_schedule_sec_value)) {
+        // $pause_scoreboard = date(tr('date and time format'), ($end_ts-$pause_scoreboard_schedule_sec_value));
+        $pause_scoreboard = date("Y-m-d H:i:s", ($end_ts-$pause_scoreboard_schedule_sec_value));
+        // $pause_scoreboard = strval($end_ts-$pause_scoreboard_schedule_sec_value);
+        await \HH\Asio\va(
+          Announcement::genCreateAuto('Scoreboard will pause at ' . $pause_scoreboard . '!'), // Announce scoreboard paused
+          ActivityLog::genCreateGenericLog('Scoreboard will pause at '. $pause_scoreboard . '!'), // Log scoreboard paused
+        );
+      }
+    }
+  }
+
   public static async function genAutoRun(): Awaitable<void> {
     // Prevent autorun.php from storing timestamps in local cache, forever (the script runs continuously).
     Configuration::deleteLocalCache('CONFIGURATION');
@@ -298,6 +354,7 @@ class Control extends Model {
       await Control::genAutoBegin(); // Check and start the game
     } else {
       await Control::genAutoEnd(); // Check and stop the game
+      await Control::genAutoPauseScoreboard(); // Check and pause the scoreboard
     }
   }
 
