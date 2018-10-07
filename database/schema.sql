@@ -225,6 +225,7 @@ LOCK TABLES `configuration` WRITE;
 INSERT INTO `configuration` (field, value, description) VALUES("game", "0", "(Boolean) Game is ongoing");
 INSERT INTO `configuration` (field, value, description) VALUES("game_paused", "0", "(Boolean) Game is paused");
 INSERT INTO `configuration` (field, value, description) VALUES("game_paused_scoreboard", "0", "(Boolean) Scoreboard is paused");
+INSERT INTO `configuration` (field, value, description) VALUES("game_paused_scoreboard_schedule", "0", "(Boolean) Scoreboard pause schedule is set");
 INSERT INTO `configuration` (field, value, description) VALUES("next_game", "0", "(Integer) Next game to happen");
 INSERT INTO `configuration` (field, value, description) VALUES("game_duration_value", "3", "(Integer) Value of the duration of the game");
 INSERT INTO `configuration` (field, value, description) VALUES("game_duration_unit", "h", "(Character) Unit of the duration of the game");
@@ -232,6 +233,8 @@ INSERT INTO `configuration` (field, value, description) VALUES("start_ts", "0", 
 INSERT INTO `configuration` (field, value, description) VALUES("end_ts", "0", "(Integer) Timestamp of end");
 INSERT INTO `configuration` (field, value, description) VALUES("pause_ts", "0", "(Integer) Timestamp of pause");
 INSERT INTO `configuration` (field, value, description) VALUES("pause_scoreboard_ts", "0", "(Integer) Timestamp of pause scoreboard");
+INSERT INTO `configuration` (field, value, description) VALUES("pause_scoreboard_schedule_value", "10", "(Integer) Value of pause scoreboard schedule");
+INSERT INTO `configuration` (field, value, description) VALUES("pause_scoreboard_schedule_unit", "m", "(Character) Unit of the duration of the game");
 INSERT INTO `configuration` (field, value, description) VALUES("timer", "0", "(Boolean) Timer is enabled");
 INSERT INTO `configuration` (field, value, description) VALUES("scoring", "0", "(Boolean) Ability score levels");
 INSERT INTO `configuration` (field, value, description) VALUES("gameboard", "1", "(Boolean) Refresh all data in the gameboard");

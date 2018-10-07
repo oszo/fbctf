@@ -217,6 +217,52 @@ class AdminController extends Controller {
       </div>;
   }
 
+  private async function genConfigurationPauseScoreboardScheduleSelect(): Awaitable<:xhp> {
+    list($config_pause_scoreboard_schedule_unit, $config_pause_scoreboard_schedule_value) = await \HH\Asio\va(
+      Configuration::gen('pause_scoreboard_schedule_unit'),
+      Configuration::gen('pause_scoreboard_schedule_value'),
+    );
+    $pause_scoreboard_schedule_unit = $config_pause_scoreboard_schedule_unit->getValue();
+    $pause_scoreboard_schedule_value = $config_pause_scoreboard_schedule_value->getValue();
+
+    $minute_selected = $pause_scoreboard_schedule_unit === 'm';
+    $hour_selected = $pause_scoreboard_schedule_unit === 'h';
+    $day_selected = $pause_scoreboard_schedule_unit === 'd';
+
+    return
+      <div class="fb-column-container">
+        <div class="col col-1-2">
+          <input
+            type="number"
+            value={$pause_scoreboard_schedule_value}
+            name="fb--conf--pause_scoreboard_schedule_value"
+          />
+        </div>
+        <div class="col col-2-2">
+          <select name="fb--conf--pause_scoreboard_schedule_unit">
+            <option
+              class="fb--conf--pause_scoreboard_schedule"
+              value="m"
+              selected={$minute_selected}>
+              Minutes
+            </option>
+            <option
+              class="fb--conf--pause_scoreboard_schedule"
+              value="h"
+              selected={$hour_selected}>
+              Hours
+            </option>
+            <option
+              class="fb--conf--pause_scoreboard_schedule"
+              value="d"
+              selected={$day_selected}>
+              Days
+            </option>
+          </select>
+        </div>
+      </div>;
+  }
+
   private async function genLanguageSelect(): Awaitable<:xhp> {
     $config = await Configuration::gen('language');
     $current_lang = $config->getValue();
@@ -332,6 +378,7 @@ class AdminController extends Controller {
       'custom_org' => Configuration::gen('custom_org'),
       'custom_byline' => Configuration::gen('custom_byline'),
       'custom_logo_image' => Configuration::gen('custom_logo_image'),
+      'game_paused_scoreboard_schedule' => Configuration::gen('game_paused_scoreboard_schedule'),
     };
 
     $results = await \HH\Asio\m($awaitables);
@@ -373,6 +420,7 @@ class AdminController extends Controller {
     $custom_org = $results['custom_org'];
     $custom_byline = $results['custom_byline'];
     $custom_logo_image = $results['custom_logo_image'];
+    $game_paused_scoreboard_schedule = $results['game_paused_scoreboard_schedule'];
     $registration_on = $registration->getValue() === '1';
     $registration_off = $registration->getValue() === '0';
     $login_on = $login->getValue() === '1';
@@ -405,6 +453,8 @@ class AdminController extends Controller {
     $livesync_off = $livesync->getValue() === '0';
     $custom_logo_on = $custom_logo->getValue() === '1';
     $custom_logo_off = $custom_logo->getValue() === '0';
+    $game_paused_scoreboard_schedule_on = $game_paused_scoreboard_schedule->getValue() === '1';
+    $game_paused_scoreboard_schedule_off = $game_paused_scoreboard_schedule->getValue() === '0';
 
     $game_start_array = array();
     if ($start_ts->getValue() !== '0' && $start_ts->getValue() !== 'NaN') {
@@ -493,6 +543,8 @@ class AdminController extends Controller {
       'registration_type_select' => $this->genRegistrationTypeSelect(),
       'configuration_duration_select' =>
         $this->genConfigurationDurationSelect(),
+      'configuration_pause_scoreboard_schedule_select' =>
+        $this->genConfigurationPauseScoreboardScheduleSelect(),
       'language_select' => $this->genLanguageSelect(),
       'password_types_select' => $this->genStrongPasswordsSelect(),
     };
@@ -501,6 +553,8 @@ class AdminController extends Controller {
     $registration_type_select = $results['registration_type_select'];
     $configuration_duration_select =
       $results['configuration_duration_select'];
+    $configuration_pause_scoreboard_schedule_select = 
+      $results['configuration_pause_scoreboard_schedule_select'];
     $language_select = $results['language_select'];
     $password_types_select = $results['password_types_select'];
 
@@ -1117,7 +1171,7 @@ class AdminController extends Controller {
                     </div>
                   </div>
                 </div>
-              </section>
+              </section>              
               <section class="admin-box">
                 <header class="admin-box-header">
                   <h3>{tr('Timer')}</h3>
@@ -1180,6 +1234,35 @@ class AdminController extends Controller {
                   </div>
                 </div>
               </section>
+              <section class="admin-box">
+                <header class="admin-box-header">
+                  <h3>{tr('Scoreboard Schedule')}</h3>
+                  <div class="admin-section-toggle radio-inline">
+                    <input
+                      type="radio"
+                      name="fb--conf--game_paused_scoreboard_schedule"
+                      id="fb--conf--game_paused_scoreboard_schedule--on"
+                      checked={$game_paused_scoreboard_schedule_on}
+                    />
+                    <label for="fb--conf--game_paused_scoreboard_schedule--on">{tr('On')}</label>
+                    <input
+                      type="radio"
+                      name="fb--conf--game_paused_scoreboard_schedule"
+                      id="fb--conf--game_paused_scoreboard_schedule--off"
+                      checked={$game_paused_scoreboard_schedule_off}
+                    />
+                    <label for="fb--conf--game_paused_scoreboard_schedule--off">{tr('Off')}</label>
+                  </div>
+                </header>
+                <div class="fb-column-container">
+                  <div class="col col-pad col-2-4">
+                    <div class="form-el el--block-label el--full-text">
+                      <label for="">{tr('Pause Scoreboard Before')}</label>
+                      {$configuration_pause_scoreboard_schedule_select}
+                    </div>
+                  </div>
+                </div>
+              </section>              
               <section class="admin-box">
                 <header class="admin-box-header">
                   <h3>{tr('LiveSync')}</h3>
